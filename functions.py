@@ -3,19 +3,63 @@ from settings import BASE_DIR, base, month
 from openpyxl import load_workbook
 import calendar
 from datetime import datetime
-ttn = load_workbook("import/ttnweight2.xlsx")
-sheet = ttn.active
-values = sheet.cell(row=16, column=30).value
+
+
+# ttn = load_workbook("import/ttnweight0.xlsx")
+# sheet = ttn.active
+# values = sheet.cell(row=16, column=30).value
+#
+
+def examination_in_month_day(year, month_):  # проверка сколько дней в месяцу
+    for key, value in month.items():
+        if value == month_:
+            return calendar.monthrange(int(year), int(key))[1]
+
 
 def date_number_document(colum):
+    # Получаем данные из ячеек
     data_number = colum.cell(row=39, column=8).value
-    date_month = colum.cell(row=39, column=13).value
+    data_number = int(str(data_number).strip('"'))  # Более безопасное преобразование
+    data_month = colum.cell(row=39, column=13).value
     year = colum.cell(row=39, column=28).value
+    year = str(year)[0:4]  # Преобразуем в строку и берем первые 4 символа
 
-    year = int(year[0:4])
-    _,num_days = calendar.monthrange(year, month.values('Июнь'))
+    # print(f"Начальные данные: число={data_number}, месяц={data_month}, год={year}")
 
-    print(num_days)
+    # count = 3
+    current_day = data_number
+    current_month = data_month
+    current_year = int(year)
+
+    # for i in range(count):
+    # Проверяем, не превышает ли текущий день количество дней в месяце
+    days_in_month = examination_in_month_day(current_year, current_month)
+
+    if current_day > days_in_month:
+        # Переходим к следующему месяцу
+        current_day = 1
+
+        # Находим следующий месяц
+        for key, value in month.items():
+            if value == current_month:
+                next_key = int(key) % 12 + 1
+                current_month = month[str(next_key)]
+
+                # Если перешли на январь, увеличиваем год
+                if next_key == 1:
+                    current_year += 1
+                break
+    else:
+        current_day += 1
+
+    # Записываем данные в ячейки
+    current_day = colum.cell(row=39, column=8, value=current_day)
+    current_month = colum.cell(row=39, column=13, value=current_month)
+    current_year = colum.cell(row=39, column=28, value=str(current_year))
+
+    # print(f"Дата добавлена {current_day}:{current_month}:{current_year}")
+    return current_day, current_month, current_year
+
 
 def examination_machine2(colum, row: int, column: int, basa):
     documen_namber = colum.cell(row=4, column=103).value
@@ -26,6 +70,8 @@ def examination_machine2(colum, row: int, column: int, basa):
         ducument = colum.cell(row=62, column=31, value=document).value
         values = colum.cell(row=18, column=89).value
         values = colum.cell(row=26, column=105, value=values).value
+        date_number_document(colum)
+
         return values, ducument, True
     else:
         values = colum.cell(row=18, column=89).value
@@ -43,8 +89,9 @@ def examination_machine2(colum, row: int, column: int, basa):
         machine1_trailer = machine1["trailer"]
         machine1_trailer = colum.cell(row=55, column=83, value=machine1_trailer).value
         ducument = colum.cell(row=62, column=31, value=document).value
+        date_number_document(colum)
 
-        return machine1_driver, machine1_certificate, machine1_state_signs, machine1_trailer, values, ducument
+    return machine1_driver, machine1_certificate, machine1_state_signs, machine1_trailer, values, ducument
 
 
 def examination_machine1(colum, row: int, column: int, basa):
@@ -56,6 +103,7 @@ def examination_machine1(colum, row: int, column: int, basa):
         ducument = colum.cell(row=62, column=31, value=document).value
         values = colum.cell(row=18, column=89).value
         values = colum.cell(row=26, column=105, value=values).value
+        date_number_document(colum)
 
         return values, ducument, True
     else:
@@ -74,7 +122,9 @@ def examination_machine1(colum, row: int, column: int, basa):
         machine1_trailer = machine1["trailer"]
         machine1_trailer = colum.cell(row=55, column=83, value=machine1_trailer).value
         ducument = colum.cell(row=62, column=31, value=document).value
-        return machine1_driver, machine1_certificate, machine1_state_signs, machine1_trailer, values, ducument
+        date_number_document(colum)
+
+    return machine1_driver, machine1_certificate, machine1_state_signs, machine1_trailer, values, ducument
 
 
 def distribute_cement(total_weight):
@@ -108,11 +158,12 @@ def distribute_cement(total_weight):
 
 
 def ttn_save_machine1(machine1, column, file):
+    count_date_document = 3
     count = len(machine1)
+    print(count)
     for i, weight in enumerate(machine1, count):
         column.cell(row=21, column=84, value=weight)
-        examination_machine1(sheet, 49, 6, base)
-
+        examination_machine1(column, 49, 6, base)
         file.save(BASE_DIR / f"export/machine1/ttnweight{i}.xlsx")
 
 
@@ -120,13 +171,22 @@ def ttn_save_machine2(machine2, column, file):
     count = len(machine2)
     for i, weight in enumerate(machine2, count):
         column.cell(row=21, column=84, value=weight)
-        examination_machine2(sheet, 49, 6, base)
+        examination_machine2(column, 49, 6, base)
+        date_number_document(column)
 
         file.save(BASE_DIR / f"export/machine2/ttnweight{i}.xlsx")
 
 
+def get_weight_from_file(filepath):
+    try:
+        ttn = load_workbook(filepath)
+        sheet = ttn.active
+        values = sheet.cell(row=16, column=30).value
+        return values
+    except Exception as e:
+        raise Exception(f"Не удалось получить вес из файла: {str(e)}")
 
-date_number_document(sheet)
+
 # machine1, machine2 = distribute_cement(values)
 # text_machine1 = f"Машина 1 сделала {len(machine1)} рейсов: {machine1}"
 # text_machine2 = f"Машина 2 сделала {len(machine2)} рейсов: {machine2}"
