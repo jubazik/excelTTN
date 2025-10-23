@@ -1,14 +1,3 @@
-# from functions import TTNApp
-# import tkinter as tk
-#
-#
-# def main():
-#     root = tk.Tk()
-#     app = TTNApp(root)
-#     root.mainloop()
-#
-# if __name__ == "__main__":
-#     main()
 from functions import get_weight_from_file, distribute_cement
 
 if __name__ == "__main__":

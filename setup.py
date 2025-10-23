@@ -43,7 +43,7 @@ setup(
     }] if sys.platform == "win32" else None,
     app=['src/gui.py'] if sys.platform == "darwin" else None,
     data_files=[
-        ('import', ['import/ttnweight0.xlsx']),
+        ('import', ['import/ttnweight.xlsx']),
         ('export', [])
     ],
     python_requires='>=3.6',

@@ -8,6 +8,7 @@ import calendar
 
 
 class TTNGeneratorGUI:
+
     def __init__(self, root):
         self.root = root
         self.root.title("Генератор ТТН накладных")
