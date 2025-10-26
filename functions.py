@@ -216,7 +216,7 @@ def ttn_save_machine2(machine2, column, file):
         column.cell(row=18, column=89, value=summ)
         examination_machine2(column, 49, 6, base)
         date_number_document(column)
-        file.save(BASE_DIR / f"export/machine2/ttnweight {number}.xlsx")
+        file.save(BASE_DIR / f"export/machine2/ttnweight {number}.xlsx")/
 
 
 def get_weight_from_file(filepath):
