@@ -4,6 +4,8 @@ from settings import BASE_DIR, base, month, month__
 from openpyxl import load_workbook
 import calendar
 
+number_document = []
+
 
 def number_check(check):
     if check % 2 == 0:
@@ -71,7 +73,7 @@ def date_number_document(colum):
 
     new_date = ".".join(new_date)
     date = colum.cell(row=5, column=103, value=str(new_date)).value
-    print(f"день: {current_day},  Месяц: {current_month}, год: {current_year} ----> Дата в ячейке R5cC103 {date}")
+    # print(f"день: {current_day},  Месяц: {current_month}, год: {current_year} ----> Дата в ячейке R5cC103 {date}")
     # print(f"Дата добавлена {current_day}:{current_month}:{current_year}")
     return f"день: {current_day},  Месяц: {current_month}, год: {current_year} ----> Дата в ячейке R5cC103 {date}"
 
@@ -113,7 +115,7 @@ def examination_machine2(colum, row: int, column: int, base):
     document_number = colum.cell(row=4, column=103).value
     document_date = colum.cell(row=5, column=103).value
     document = f"ТТН {document_number} от {document_date}"
-    print(document)
+    # print(document)
     values = colum.cell(row=row, column=column).value
     if values == "Гайирбеков Ибрагим Расулович":
         document = colum.cell(row=62, column=31, value=document).value
@@ -172,13 +174,15 @@ def distribute_cement(total_weight):
     print(f"Количество рейсов первой машины:{len(machine1)} количество рейсов второй машины: {len(machine2)}")
     return machine1, machine2
 
+number_document = []
 
 def ttn_save_machine1(machine1, column, file):
     number_ = int(column.cell(row=4, column=103).value)
-    start = number_check(number_)
+    number_document.append(number_) #  Нужно сохранять первое значение отдельно
+    start = number_check(number_)  #  проверка
     for i, weight in enumerate(machine1, start=start):
-        number = number_ + (i - 1) * 2
-        print(f" первая  машина № :{weight}, Файл {i}")
+        number = number_ + (i - start) * 2 # решение
+        print(f" первая  машина № :{weight}, Файл {number_ + (i - start) * 2}")
         column.cell(row=4, column=103, value=number)
         column.cell(row=16, column=30, value=weight)
         column.cell(row=17, column=30, value=weight)
@@ -192,20 +196,12 @@ def ttn_save_machine1(machine1, column, file):
 
 
 def ttn_save_machine2(machine2, column, file):
-    initial_value = int(column.cell(row=4, column=103).value)
-    print(initial_value, "ttn - 2")
-    # Если начальное значение четное - делаем нечетное, и наоборот
-    if initial_value % 2 == 0:
-        start_value = initial_value + 1  # Четное → следующее нечетное
-        print(f"test {start_value} четно")
-    else:
-        start_value = initial_value + 1
-        print(f"test {start_value} нечетно")
-
-    start = number_check(start_value)
+    number_ = int(number_document[0]) + 1 #  взял число из списка
+    start = number_check(number_)#  проверка
+    print(number_)
     for i, weight, in enumerate(machine2, start=start):
-        number = start_value + (i - 1) * 2
-        print(f" Вторая машина № :{weight}, Файл {i}")
+        number = number_ + (i - start) * 2  # решение
+        print(f" Вторая машина № :{weight}, Файл {number}")
         column.cell(row=4, column=103, value=number)
         column.cell(row=16, column=30, value=weight)
         column.cell(row=17, column=30, value=weight)
@@ -216,7 +212,7 @@ def ttn_save_machine2(machine2, column, file):
         column.cell(row=18, column=89, value=summ)
         examination_machine2(column, 49, 6, base)
         date_number_document(column)
-        file.save(BASE_DIR / f"export/machine2/ttnweight {number}.xlsx")/
+        file.save(BASE_DIR / f"export/machine2/ttnweight {number}.xlsx")
 
 
 def get_weight_from_file(filepath):

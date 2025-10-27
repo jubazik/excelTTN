@@ -203,17 +203,18 @@ def number_check(check):
         return 1
 
 
+
 def test_number_enumerate(list, check):
     number_list = {}
 
     start = number_check(check)
+    # chec
     for  i, weight in enumerate(list,start=start):
-
-        number_list[check+(i-1)*2] =weight
+        number_list[check+(i-start)*2] =weight
     return number_list
 number = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 
-print(f'test-1', test_number_enumerate(number, 1))
+print(f'test-1', test_number_enumerate(number, 2))
 number_ = ws.cell(row=4, column=103).value
 number = int(number_)
 
