@@ -174,7 +174,7 @@ def distribute_cement(total_weight):
     print(f"Количество рейсов первой машины:{len(machine1)} количество рейсов второй машины: {len(machine2)}")
     return machine1, machine2
 
-number_document = []
+number_document = [] # сохранение начального номера документа
 
 def ttn_save_machine1(machine1, column, file):
     number_ = int(column.cell(row=4, column=103).value)
