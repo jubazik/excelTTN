@@ -14,9 +14,7 @@ class TTNGeneratorGUI:
         self.root.title("Генератор ТТН накладных")
         self.root.geometry("900x700")
 
-        self.input_file = None
-        self.sheet = None
-
+        self.template_path = None
         self.create_widgets()
 
     def create_widgets(self):
@@ -102,28 +100,28 @@ class TTNGeneratorGUI:
             return
 
         try:
-            ttn = load_workbook(filename)
-            self.sheet = ttn.active
-            self.input_file = ttn
+            self.template_path = filename
             self.status_var.set(f"Файл загружен: {Path(filename).name}")
             messagebox.showinfo("Успех", "Файл успешно загружен!")
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось загрузить файл: {str(e)}")
 
     def get_weight(self):
-        if not self.sheet:
+        if not self.template_path:
             messagebox.showerror("Ошибка", "Сначала загрузите файл ТТН")
             return
 
         try:
-            values = self.sheet.cell(row=16, column=30).value
+            ttn = load_workbook(self.template_path)
+            sheet = ttn.active
+            values = sheet.cell(row=16, column=30).value
             self.weight_var.set(str(values) if values else "")
             self.status_var.set(f"Получен вес: {values} т")
         except Exception as e:
             messagebox.showerror("Ошибка", f"Не удалось получить вес: {str(e)}")
 
     def generate_ttn(self):
-        if not self.sheet:
+        if not self.template_path:
             messagebox.showerror("Ошибка", "Сначала загрузите файл ТТН")
             return
 
@@ -136,18 +134,31 @@ class TTNGeneratorGUI:
             total_weight = float(weight_str)
             output_dir = Path(self.output_var.get())
 
+            # Создаем папки для сохранения
+            (output_dir / "machine1").mkdir(parents=True, exist_ok=True)
+            (output_dir / "machine2").mkdir(parents=True, exist_ok=True)
+
             self.status_var.set("Распределение веса...")
             self.root.update()
 
-            # Используем оригинальные функции
+            # Очищаем номер документа перед началом
+            # global number_document
+            # number_document.clear()
+
+            # Распределяем вес
             machine1, machine2 = distribute_cement(total_weight)
 
-            self.status_var.set("Сохранение файлов...")
+            self.status_var.set("Сохранение файлов для machine1...")
             self.root.update()
 
-            # Сохраняем файлы
-            ttn_save_machine1(machine1, self.sheet, self.input_file)
-            ttn_save_machine2(machine2, self.sheet, self.input_file)
+            # Сохраняем файлы для machine1 с ИСХОДНЫМ шаблоном
+            ttn_save_machine1(machine1, self.template_path, output_dir)
+
+            self.status_var.set("Сохранение файлов для machine2...")
+            self.root.update()
+
+            # Сохраняем файлы для machine2 с ИСХОДНЫМ шаблоном
+            ttn_save_machine2(machine2, self.template_path, output_dir)
 
             # Выводим результаты
             result = f"""РАСПРЕДЕЛЕНИЕ ЦЕМЕНТА
@@ -190,3 +201,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+

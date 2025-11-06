@@ -1,7 +1,20 @@
 from pathlib import Path
+import calendar
 
 
+def number_check(check):  # Проверка число на четность
+    if check % 2 == 0:
+        print(f"число {check} - четное ")
+        return 2
+    else:
+        print(f"число {check} - нечетное ")
+        return 1
 
+
+def examination_in_month_day(year, month_):  # проверка сколько дней в месяцу
+    for key, value in month.items():
+        if value == month_:
+            return calendar.monthrange(int(year), int(key))[1]
 
 folder_path_machine1 = "export/machine1"
 folder_path_machine2 = "export/machine2"

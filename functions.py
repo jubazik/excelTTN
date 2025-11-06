@@ -1,26 +1,9 @@
 import random
 
-from settings import BASE_DIR, base, month, month__
+
+from settings import BASE_DIR, base, month, month__, number_check, examination_in_month_day
 from openpyxl import load_workbook
-import calendar
-
-number_document = []
-
-
-def number_check(check):
-    if check % 2 == 0:
-        print(f"число {check} - четное ")
-        return 2
-    else:
-        print(f"число {check} - нечетное ")
-        return 1
-
-
-def examination_in_month_day(year, month_):  # проверка сколько дней в месяцу
-    for key, value in month.items():
-        if value == month_:
-            return calendar.monthrange(int(year), int(key))[1]
-
+#
 
 def date_number_document(colum):
     # Получаем данные из ячеек
@@ -73,9 +56,9 @@ def date_number_document(colum):
 
     new_date = ".".join(new_date)
     date = colum.cell(row=5, column=103, value=str(new_date)).value
-    # print(f"день: {current_day},  Месяц: {current_month}, год: {current_year} ----> Дата в ячейке R5cC103 {date}")
+    print(f"день: {current_day},  Месяц: {current_month}, год: {current_year} ----> Дата в ячейке R5cC103 {date}")
     # print(f"Дата добавлена {current_day}:{current_month}:{current_year}")
-    return f"день: {current_day},  Месяц: {current_month}, год: {current_year} ----> Дата в ячейке R5cC103 {date}"
+    # return f"день: {current_day},  Месяц: {current_month}, год: {current_year} ----> Дата в ячейке R5cC103 {date}"
 
 
 def examination_machine1(colum, row: int, column: int, basa):
@@ -106,12 +89,11 @@ def examination_machine1(colum, row: int, column: int, basa):
         machine1_trailer = machine1["trailer"]
         machine1_trailer = colum.cell(row=55, column=83, value=machine1_trailer).value
         ducument = colum.cell(row=62, column=31, value=document).value
-        date_number_document(colum)
 
     return machine1_driver, machine1_certificate, machine1_state_signs, machine1_trailer, values, ducument
 
 
-def examination_machine2(colum, row: int, column: int, base):
+def examination_machine2(colum, row: int, column: int, basa):
     document_number = colum.cell(row=4, column=103).value
     document_date = colum.cell(row=5, column=103).value
     document = f"ТТН {document_number} от {document_date}"
@@ -140,7 +122,7 @@ def examination_machine2(colum, row: int, column: int, base):
         machine1_trailer = machine1["trailer"]
         machine1_trailer = colum.cell(row=55, column=83, value=machine1_trailer).value
         document = colum.cell(row=62, column=31, value=document).value
-        date_number_document(colum)
+        # date_number_document(colum)
 
     return machine1_driver, machine1_certificate, machine1_state_signs, machine1_trailer, values, document
 
@@ -174,69 +156,71 @@ def distribute_cement(total_weight):
     print(f"Количество рейсов первой машины:{len(machine1)} количество рейсов второй машины: {len(machine2)}")
     return machine1, machine2
 
-number_document = [] # сохранение начального номера документа
-
-def ttn_save_machine1(machine1, column, file):
-    number_ = int(column.cell(row=4, column=103).value)
-    number_document.append(number_) #  Нужно сохранять первое значение отдельно
-    start = number_check(number_)  #  проверка
-    for i, weight in enumerate(machine1, start=start):
-        number = number_ + (i - start) * 2 # решение
-        print(f" первая  машина № :{weight}, Файл {number_ + (i - start) * 2}")
-        column.cell(row=4, column=103, value=number)
-        column.cell(row=16, column=30, value=weight)
-        column.cell(row=17, column=30, value=weight)
-        column.cell(row=18, column=30, value=weight)
-        summ = column.cell(row=16, column=30).value * column.cell(row=16, column=37).value
-        column.cell(row=17, column=89, value=summ)
-        column.cell(row=18, column=89, value=summ)
-        column.cell(row=16, column=89, value=summ)
-        examination_machine1(column, 49, 6, base)
-        file.save(BASE_DIR / f"export/machine1/ttnweight {number}.xlsx")
 
 
-def ttn_save_machine2(machine2, column, file):
-    number_ = int(number_document[0]) + 1 #  взял число из списка
-    start = number_check(number_)#  проверка
-    print(number_)
-    for i, weight, in enumerate(machine2, start=start):
-        number = number_ + (i - start) * 2  # решение
-        print(f" Вторая машина № :{weight}, Файл {number}")
-        column.cell(row=4, column=103, value=number)
-        column.cell(row=16, column=30, value=weight)
-        column.cell(row=17, column=30, value=weight)
-        column.cell(row=18, column=30, value=weight)
-        summ = column.cell(row=16, column=30).value * column.cell(row=16, column=37).value
-        column.cell(row=16, column=89, value=summ)
-        column.cell(row=17, column=89, value=summ)
-        column.cell(row=18, column=89, value=summ)
-        examination_machine2(column, 49, 6, base)
-        date_number_document(column)
-        file.save(BASE_DIR / f"export/machine2/ttnweight {number}.xlsx")
+def ttn_save_machine1(machine1, template_path, output_dir ):
+    try:
+        # Загружаем ЧИСТЫЙ шаблон для machine1
+        workbook = load_workbook(template_path)
+        column = workbook.active
 
+        number_ = int(column.cell(row=4, column=103).value)
+        start = number_check(number_)  # проверка
+
+        for i, weight in enumerate(machine1, start=start):
+            number = number_ + (i - start) * 2  # решение
+            column.cell(row=4, column=103, value=number)
+            column.cell(row=16, column=30, value=weight)
+            column.cell(row=17, column=30, value=weight)
+            column.cell(row=18, column=30, value=weight)
+            summ = column.cell(row=16, column=30).value * column.cell(row=16, column=37).value
+            column.cell(row=17, column=89, value=summ)
+            column.cell(row=18, column=89, value=summ)
+            column.cell(row=16, column=89, value=summ)
+            date_document = column.cell(row=5, column=103).value
+            examination_machine1(column, 49, 6, base)
+
+            workbook.save(
+                output_dir / "machine1" / f"Tovarno-transportnaya nakladnaya № {number} ot {date_document}.xlsx")
+
+    except Exception as e:
+        return f'Ошибка:{e}'
+
+
+def ttn_save_machine2(machine2, template_path, output_dir):
+    try:
+        # Загружаем ЧИСТЫЙ шаблон для machine2 (исходный файл)
+        workbook = load_workbook(template_path)
+        column = workbook.active
+
+        number_ = int(column.cell(row=4, column=103).value)+ 1  # взял число из списка
+        start = number_check(number_)  # проверка
+        print(number_)
+
+        for i, weight in enumerate(machine2, start=start):
+            number = number_ + (i - start) * 2  # решение
+            column.cell(row=4, column=103, value=number)
+            column.cell(row=16, column=30, value=weight)
+            column.cell(row=17, column=30, value=weight)
+            column.cell(row=18, column=30, value=weight)
+            summ = column.cell(row=16, column=30).value * column.cell(row=16, column=37).value
+            column.cell(row=16, column=89, value=summ)
+            column.cell(row=17, column=89, value=summ)
+            column.cell(row=18, column=89, value=summ)
+            date_document = column.cell(row=5, column=103).value
+            examination_machine2(column, 49, 6, base)
+            workbook.save(
+                output_dir / "machine2" / f"Tovarno-transportnaya nakladnaya № {number} ot {date_document}.xlsx")
+
+    except Exception as e:
+        return f'Ошибка {e}'
 
 def get_weight_from_file(filepath):
     try:
         ttn = load_workbook(filepath)
         sheet = ttn.active
         values = sheet.cell(row=16, column=30).value
+
         return values
     except Exception as e:
         raise Exception(f"Не удалось получить вес из файла: {str(e)}")
-
-# def ttn_save_machine1(machine1, column, file):
-#     count = len(machine1)
-#     print(count)
-#     for i, weight in enumerate(machine1, count):
-#         column.cell(row=21, column=84, value=weight)
-#         examination_machine1(column, 49, 6, base)
-#         file.save(BASE_DIR / f"export/machine1/ttnweight{i}.xlsx")
-
-
-# def ttn_save_machine2(machine2, column, file):
-#     count = len(machine2)
-#     for i, weight in enumerate(machine2, count):
-#         column.cell(row=21, column=84, value=weight)
-#         examination_machine2(column, 49, 6, base)
-#         date_number_document(column)
-#         file.save(BASE_DIR / f"export/machine2/ttnweight{i}.xlsx")

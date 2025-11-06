@@ -1,5 +1,7 @@
 import datetime
-from settings import month__, month, folder_path_machine1, folder_path_machine2
+from settings import month__, month, BASE_DIR, base, number_check
+from settings import folder_path_machine1
+from settings import folder_path_machine2
 import calendar
 import random
 from openpyxl import load_workbook
@@ -10,7 +12,9 @@ month__.items()
 # print(month__.items())
 wb = load_workbook('import/ttnweight0.xlsx')
 ws = wb.active
+number_document = []
 
+total_weight = float(ws.cell(row=16,  column=30).value)
 
 def examination_in_month_day(year, month_):  # проверка сколько дней в месяцу
     for key, value in month.items():
@@ -189,36 +193,82 @@ def distribute_cement(total_weight):
     return machine1, machine2
 
 
+
+
+def ttn_save_machine1(machine1, column, file):
+    try:
+        number_ = int(column.cell(row=4, column=103).value)
+        number_document.append(number_)  # Нужно сохранять первое значение отдельно
+        start = number_check(number_)  # проверка
+        for i, weight in enumerate(machine1, start=start):
+            number = number_ + (i - start) * 2  # решение
+            # print(f" первая  машина № :{weight}, Файл {number}")
+            column.cell(row=4, column=103, value=number)
+            column.cell(row=16, column=30, value=weight)
+            column.cell(row=17, column=30, value=weight)
+            column.cell(row=18, column=30, value=weight)
+            summ = column.cell(row=16, column=30).value * column.cell(row=16, column=37).value
+            column.cell(row=17, column=89, value=summ)
+            column.cell(row=18, column=89, value=summ)
+            column.cell(row=16, column=89, value=summ)
+            date_document = column.cell(row=5, column=103).value
+            examination_machine1(column, 49, 6, base)
+
+            file.save(BASE_DIR / f"export/machine1/Tovarno-transportnaya nakladnaya № {number} ot {date_document}.xlsx")
+    except Exception as e:
+        return f'Ошибка:{e}'
+
+
+def ttn_save_machine2(machine2, column, file):
+    try:
+        number_ = int(number_document[0]) + 1  # взял число из списка
+        start = number_check(number_)  # проверка
+        print(number_)
+        for i, weight, in enumerate(machine2, start=start):
+            number = number_ + (i - start) * 2  # решение
+            column.cell(row=4, column=103, value=number)
+            column.cell(row=16, column=30, value=weight)
+            column.cell(row=17, column=30, value=weight)
+            column.cell(row=18, column=30, value=weight)
+            summ = column.cell(row=16, column=30).value * column.cell(row=16, column=37).value
+            column.cell(row=16, column=89, value=summ)
+            column.cell(row=17, column=89, value=summ)
+            column.cell(row=18, column=89, value=summ)
+            date_document = column.cell(row=5, column=103).value
+            examination_machine2(column, 49, 6, base)
+            file.save(BASE_DIR / f"export/machine2/Tovarno-transportnaya nakladnaya № {number} ot {date_document}.xlsx")
+        pass
+    except Exception as e:
+        return f'Ошибка {e}'
+
+
+# def number_check(check):
+#     if check % 2 == 0:
+#         print(f"число {check} - четное ")
+#         return 2
+#     else:
+#         print(f"число {check} - нечетное ")
+#         return 1
+
+
 number = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
 count = int(len(number))
-print(len(number), '____')
 
 
-def number_check(check):
-    if check % 2 == 0:
-        print(f"число {check} - четное ")
-        return 2
-    else:
-        print(f"число {check} - нечетное ")
-        return 1
+# def test_number_enumerate(list, check):
+#     number_list = {}
+#
+#     start = number_check(check)
+#     # chec
+#     for i, weight in enumerate(list, start=start):
+#         number_list[check + (i - start) * 2] = weight
+#     return number_list
 
 
-
-def test_number_enumerate(list, check):
-    number_list = {}
-
-    start = number_check(check)
-    # chec
-    for  i, weight in enumerate(list,start=start):
-        number_list[check+(i-start)*2] =weight
-    return number_list
-number = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
-
-print(f'test-1', test_number_enumerate(number, 2))
-number_ = ws.cell(row=4, column=103).value
-number = int(number_)
-
-print(number_check(number))
+# number = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
+#
+# number_ = ws.cell(row=4, column=103).value
+# number = int(number_)
 
 dict_ = {
     1: ['user1', "password", 'login'],
@@ -232,11 +282,19 @@ dict_ = {
 
 file_count = count_files_pathlib(folder_path_machine1)
 file_count2 = count_files_pathlib(folder_path_machine2)
+print(number_check(number))
 
 print(file_count)
 print(file_count2)
 
 print(dict_.get(3))
+print(number_check(number))
+# print(f'test-1', test_number_enumerate(number, 2))
 
+
+machine1, machine2 = distribute_cement(total_weight=total_weight)
+
+ttn_save_machine1(machine1, ws, folder_path_machine1)
+ttn_save_machine2(machine2, ws, folder_path_machine2)
 # print(distribute_cement(319.3))
 # print(date_number_document(ws))
