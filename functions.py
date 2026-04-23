@@ -170,9 +170,11 @@ def ttn_save_machine1(machine1, template_path, output_dir ):
         for i, weight in enumerate(machine1, start=start):
             number = number_ + (i - start) * 2  # решение
             column.cell(row=4, column=103, value=number)
+            column.cell(row=42, column=102, value=number)
             column.cell(row=16, column=30, value=weight)
             column.cell(row=17, column=30, value=weight)
             column.cell(row=18, column=30, value=weight)
+            column.cell(row=21, column=84, value=weight)
             summ = column.cell(row=16, column=30).value * column.cell(row=16, column=37).value
             column.cell(row=17, column=89, value=summ)
             column.cell(row=18, column=89, value=summ)
@@ -200,9 +202,11 @@ def ttn_save_machine2(machine2, template_path, output_dir):
         for i, weight in enumerate(machine2, start=start):
             number = number_ + (i - start) * 2  # решение
             column.cell(row=4, column=103, value=number)
+            column.cell(row=42, column=102, value=number)
             column.cell(row=16, column=30, value=weight)
             column.cell(row=17, column=30, value=weight)
             column.cell(row=18, column=30, value=weight)
+            column.cell(row=21, column=84, value=weight)
             summ = column.cell(row=16, column=30).value * column.cell(row=16, column=37).value
             column.cell(row=16, column=89, value=summ)
             column.cell(row=17, column=89, value=summ)
